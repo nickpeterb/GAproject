@@ -1,0 +1,143 @@
+<html>
+    <head>
+        <title>GAtwo</title>
+        <script src = "genetictwo.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="table.css">
+    </head>
+    <body>
+
+      <table id="results">
+	       <thead>
+		      <tr>
+			      <th>Generation</th>
+			      <th>Population</th>
+		      </tr>
+	       </thead>
+	    <tbody style="font-family: monospace;">
+	    </tbody>
+      </table>
+
+    <script>
+    var genetic = Genetic.create();
+
+    genetic.optimize = Genetic.Optimize.Maximize;
+    genetic.select1 = Genetic.Select1.Tournament3;
+    genetic.select2 = Genetic.Select2.Tournament3;
+
+    genetic.seed = function() {
+      var ent = {
+        "hunterSpeed" : Math.floor(Math.random() * 50) + 1,
+        "hunterStrength" : Math.floor(Math.random() * 10) + 1,
+        "hunterFitness" : 0,
+        "preySpeed" : Math.floor(Math.random() * 50) + 1,
+        "preyArmour" : Math.floor(Math.random() * 10) + 1
+      }
+      return ent;
+    }
+
+    genetic.fitness = function(indi){ // indi == entity == individual
+      return indi.hunterFitness;
+    }
+
+    genetic.mutate = function(indi) {
+      if(Math.random() <= 0.5){
+        var speedChange = Math.floor(Math.random() * 13) + 1;
+        if(Math.random() <= 0.5){
+          indi.hunterSpeed - speedChange < 0 ? indi.hunterSpeed = 0 : indi.hunterSpeed -= speedChange;
+        } else {
+          indi.hunterSpeed + speedChange > 50 ? indi.hunterSpeed = 50 : indi.hunterSpeed += speedChange;
+        }
+      } else {
+        var strengthChange = Math.floor(Math.random() * 3) + 1;
+        if(Math.random() <= 0.5){
+          indi.hunterStrength - strengthChange < 0 ? indi.hunterStrength = 0 : indi.hunterStrength -= strengthChange;
+        } else {
+          indi.hunterStrength + strengthChange > 10 ? indi.hunterStrength = 10 : indi.hunterStrength += strengthChange;
+        }
+      }
+
+      if(Math.random() <= 0.5){
+        var speedChange = Math.floor(Math.random() * 13) + 1;
+        if(Math.random() <= 0.5){
+          indi.preySpeed - speedChange < 0 ? indi.preySpeed = 0 : indi.preySpeed = indi.preySpeed - speedChange;
+        } else {
+          indi.preySpeed + speedChange > 50 ? indi.preySpeed = 50 : indi.preySpeed = indi.preySpeed + speedChange;
+        }
+      } else {
+        var armourChange = Math.floor(Math.random() * 4) + 1;
+        if(Math.random() <= 0.5){
+          indi.preyArmour - armourChange < 0 ? indi.preyArmour = 0 : indi.preyArmour = indi.preyArmour - armourChange;
+        } else {
+          indi.preyArmour + armourChange > 10 ? indi.preyArmour = 10 : indi.preyArmour = indi.preyArmour + armourChange;
+        }
+      }
+
+      return indi;
+    }
+
+    genetic.crossover = function(parent1,parent2){
+      var child1 = {
+        "hunterSpeed" : parent1.hunterSpeed,
+        "hunterStrength" : parent2.hunterStrength,
+        "hunterFitness" : 0,
+        "preySpeed" : parent1.preySpeed,
+        "preyArmour" : parent2.preyArmour
+      }
+
+      var child2 = {
+        "hunterSpeed" : parent2.hunterSpeed,
+        "hunterStrength" : parent1.hunterStrength,
+        "hunterFitness" : 0,
+        "preySpeed" : parent2.preySpeed,
+        "preyArmour" : parent1.preyArmour
+      }
+
+      return [child1,child2];
+    }
+
+    genetic.generation = function(pop, generation, stats) {
+      for (var i=0;i<pop.length;++i)  {
+        pop[i].hunterFitness = 0;
+      }
+
+      return true;
+    };
+
+    genetic.notification = function(pop, generation, stats, isFinished) {
+      var buf = "";
+      buf += "<tr>";
+      buf += "<td>" + generation + "</td>";
+      buf += "<td>" + pop.length + "</td>";
+      buf += "</tr>";
+      $("#results tbody").prepend(buf);
+    }
+    /*
+    function preyPop(size) {
+      var preyPop = [];
+      for(var i = 0; i < size; ++i){
+        preyPop.push([Math.floor(Math.random() * 50) + 1, Math.floor(Math.random() * 10) + 1]);
+      }
+      return preyPop;
+    }
+    */
+    $(document).ready(function () {
+
+    		$("#results tbody").html("");
+
+    		var config = {
+    			"iterations": 5000
+    			, "size": 500 //more
+    			, "crossover": 0.9 //more 0.9 //0.3
+    			, "mutation": 0.3 //less 0.2 - 0.1 //0.3
+    			, "skip": 0
+    		};
+    		var userData = {
+          //"preyPop" : preyPop(config.size);
+    		};
+    		genetic.evolve(config, userData);
+    });
+
+    </script>
+    </body>
+</html>
